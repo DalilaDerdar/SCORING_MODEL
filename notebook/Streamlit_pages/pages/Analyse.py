@@ -46,7 +46,7 @@ def plot_parallel_bars(client_data, similar_clients_data, top_features):
     
     # Mise à jour de la disposition du graphique
     fig.update_layout(
-        title="Comparaison des 10 facteurs clefs entre le client et les clients similaires",
+        title="Comparaison du facteur clef, entre le client et les clients similaires",
         barmode='group',
         yaxis_title="Valeur",
         xaxis_title="Facteurs clefs",
@@ -160,7 +160,7 @@ def main():
     # Option "Facteurs clefs du client"
     st.set_option('deprecation.showPyplotGlobalUse', False)
     if st.sidebar.checkbox("Facteurs clefs du client"):
-        st.markdown("### Facteurs clefs du client")
+        st.markdown("<h3 style='text-align: left; color: #800020 ;'>Facteurs clefs du client</h3>", unsafe_allow_html=True)
         with st.expander("Cliquez pour afficher les détails"):
             st.markdown("""Comment lire ce graphique:<br>         
             <b>Axe Vertical:</b><br>
@@ -186,7 +186,7 @@ def main():
 
         explainer = shap.TreeExplainer(model.named_steps['classifier'])
         shap_values = explainer.shap_values(data_to_predict)
-
+        
         shap.initjs()
     
         # Générez votre plot
@@ -199,17 +199,21 @@ def main():
     import plotly.express as px
 
     if st.sidebar.checkbox("Information sur les facteurs clefs généraux"):
-        st.markdown("### Information sur les facteurs clefs généraux")
+        st.markdown("<h3 style='text-align: left; color: #800020 ;'>Information sur les facteurs clefs généraux</h3>", unsafe_allow_html=True)
         with st.expander("Cliquez pour afficher les détails"):
-            st.write("A COMPLETER.")
+            st.write(""" Cette section présente les facteurs clés qui ont le plus grand impact sur les décisions de prêt.
+                    Chaque point du graphique représente une caractéristique de vos données. Plus le point est à droite,
+                    plus cette caractéristique a un impact fort sur la prédiction de capacité de remboursement, et plus il est à gauche, plus elle a un impact faible.
+                     Vous pouvez choisir le nombre de facteurs que vous souhaitez afficher.""")
         importances = model.named_steps['classifier'].feature_importances_
         feature_importances = pd.DataFrame({'Feature': X_sample.columns, 'Importance': importances})
         feature_importances = feature_importances.sort_values(by='Importance', ascending=True)  # Inversez ici pour le tri ascendant
 
         # Ajouter une réglette pour choisir le nombre de caractéristiques à afficher
-        num_features = st.slider('Nombre de facteurs clefs à afficher:', min_value=5, max_value=30, value=10, step=5)
-        top_features = feature_importances[-num_features:]  # Prenez les derniers éléments au lieu des premiers
-
+        num_features = st.slider('Nombre de facteurs clefs à afficher:', min_value=5, max_value=15, value=10, step=5)
+        top_features = feature_importances[-num_features:]  # Prend les derniers éléments au lieu des premiers
+        
+        
     
         fig = px.bar(top_features, 
                  x='Importance', 
@@ -233,7 +237,11 @@ def main():
     # Option "Comparaison des informations du client"
     if st.sidebar.checkbox("Comparer les informations du client"):
         st.markdown("<h3 style='text-align: left; color: #800020 ;'>Comparaison des informations du client</h3>", unsafe_allow_html=True)
-
+        with st.expander("Cliquez pour afficher les détails"):
+            st.write(""" Dans cette section, vous pouvez comparer les données de votre client avec les données de l'ensemble des clients ou avec 
+                 les données des clients similaires. Pour chacune des comparaisons, les données des autres clients s'affichent sous forme de statistiques descriptives : 
+                count pour compter le nombre de clients, mean pour la moyenne, std pour l'écart-type, min pour la valeur minimale, 25% pour le premier quartile, 
+                50% pour la médiane, 75% pour le troisième quartile et max pour la valeur maximale.""")
         # Choix du groupe de comparaison
         compare_with = st.radio("Comparer avec :", ["Ensemble des clients", "Clients similaires"])
         
@@ -256,10 +264,10 @@ def main():
             # Informations spécifiques du client par rapport à l'ensemble
             client_info = data_to_predict_filtered.describe()
             st.write(f"Informations pour le client n°{index_selected}:")
-            st.write(client_info)
+            st.write(data_to_predict_filtered)
             
         else:  # Clients similaires
-            # Utilisez SimpleImputer avec la stratégie 'most_frequent'
+            # Définir les clients similaires (10 plus proches)
             imputer = SimpleImputer(strategy='most_frequent')
             X_filled = pd.DataFrame(imputer.fit_transform(X_filtered), columns=X_filtered.columns)
 
@@ -275,13 +283,21 @@ def main():
             # Informations spécifiques du client par rapport aux clients similaires
             client_info = data_to_predict_filtered.describe()
             st.write(f"Informations pour le client n°{index_selected}:")
-            st.write(client_info)
+            st.write(data_to_predict_filtered)
 
             st.markdown("<br>"*3, unsafe_allow_html=True)
 
-            fig = plot_parallel_bars(data_to_predict, closest_clients, top_features)
+            #Graphique de comparaison
+            # Choix de la caractéristique à comparer
+            st.markdown("<h4 style='text-align: left; color: black ;'>Comparaison des facteurs clefs</h4>", unsafe_allow_html=True)
+            with st.expander("Cliquez pour afficher les détails"):
+                st.write(""" Choisissez et affichez sous forme de graphique, un facteur clef à comparer entre les données des clients similaires et celles du client sélectionné.""")
+            feature_to_compare = st.selectbox("Choisissez le facteur clef :", top_features)
+            fig = plot_parallel_bars(data_to_predict, closest_clients, [feature_to_compare])
             st.plotly_chart(fig)
     
 
 if __name__ == '__main__':
     main()
+
+
