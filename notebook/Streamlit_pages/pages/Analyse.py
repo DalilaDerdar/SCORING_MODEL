@@ -26,6 +26,10 @@ import streamlit as st
 import joblib
 import shap
 import plotly.graph_objects as go
+import plotly.express as px
+import requests
+import json
+
 
 # Fonction pour afficher les graphiques
 def plot_parallel_bars(client_data, similar_clients_data, top_features):
@@ -44,7 +48,7 @@ def plot_parallel_bars(client_data, similar_clients_data, top_features):
         go.Bar(name='Clients Similaires (Moyenne)', x=categories, y=similar_values, marker_color='#0033FF')
     ])
     
-    # Mise à jour de la disposition du graphique
+    # Disposition du graphique
     fig.update_layout(
         title="Comparaison du facteur clef, entre le client et les clients similaires",
         barmode='group',
@@ -61,18 +65,22 @@ def load_model():
     model = joblib.load('best_model.pkl')
     return model
 
+#Predire avec API Flask
+def predict_with_api(features, route):
+    url_base = "http://localhost:5000/"  #vérifier l'url VS url de flask_app.py
+    url = url_base + route
+    response = requests.post(url, json=json.dumps(features.to_dict()))  
+    result = response.json()
+    return result
+
+
 def load_data():
     X = joblib.load('X.pkl')
     X_test = joblib.load('X_test.pkl')
     return X, X_test
+
 X, X_test = load_data()
 
-# Prédire avec le modèle
-def predict(model, data):
-    y_pred_proba = model.predict_proba(data)[:, 1]
-    threshold = 0.37
-    y_pred = (y_pred_proba > threshold).astype(int)
-    return y_pred
 
 # Application principale
 def main():
@@ -83,56 +91,48 @@ def main():
     model = load_model()
 
     # Charger les données d'échantillon pour la démo
+    import pandas as pd
     sample_df = pd.read_csv('../../data/sample_df.csv')
     X_sample = sample_df.drop(columns=["TARGET"])
-    
+
     # Créer une sidebar
-    #st.sidebar.title("Paramètres")
     index_selected = st.sidebar.selectbox("""Choisissez le dossier client à tester en sélectionnant 
                                           son numéro de dossier:""", X_sample.index)
     data_to_predict = X_sample.loc[[index_selected]]
-    #st.markdown(f'### RESULTAT D’ANALYSE DU DOSSIER CLIENT n°{index_selected}')
+
+    
     st.markdown("""<h2 style='text-align: left; color: #5a5a5a;'>Résultat d'analyse du dossier client n°{}</h2>""".format(index_selected), 
                 unsafe_allow_html=True)
     st.markdown('<br>', unsafe_allow_html=True)
 
 
-    # Créer une variable pour stocker l'état de la prédiction
-    prediction_made = st.session_state.get("prediction_made", False)
-    result = st.session_state.get("result", None)
-
     if st.sidebar.button('Lancer la prédiction'):
-        pred = predict(model, data_to_predict)
-        if pred[0] == 0:
-            result = "accept"
+        selected_row = X_sample.loc[index_selected]
+        selected_features = selected_row
+
+        prediction = predict_with_api(selected_features, 'predict')
+
+        if prediction == 0:
+            result_text = "accepté"
         else:
-            result = "refuse"
-        prediction_made = True
-        st.session_state.prediction_made = prediction_made
-        st.session_state.result = result
-
-    if prediction_made:
-        if result == "accept":
-            st.markdown("""
-            <div style="background-color: green; padding: 10px 15px; border-radius: 5px; width: 50%; margin: 0 auto;">
-                <h4 style="color: white; text-align: center;">Crédit accepté</h4>
+            result_text = "refusé"
+        
+        st.markdown(f"""
+            <div style="background-color: {'green' if prediction == 0 else 'red'}; 
+                         padding: 10px 15px; border-radius: 5px; width: 50%; margin: 0 auto;">
+                <h4 style="color: white; text-align: center;">Crédit {result_text.capitalize()}</h4>
             </div>
-            """, unsafe_allow_html=True)
-            st.markdown('<br>', unsafe_allow_html=True)
-            st.write("""Votre client semble avoir les éléments requis pour rembourser son crédit durablement. 
-                 Nous conseillons l’obtention du prêt.""")
-            st.markdown("<br>", unsafe_allow_html=True)
+        """, unsafe_allow_html=True)
 
-        else:  # Si le résultat est "refuse"
-            st.markdown("""
-            <div style="background-color: red; padding: 10px 15px; border-radius: 5px; width: 50%; margin: 0 auto;">
-                <h4 style="color: white; text-align: center;">Crédit refusé</h4>
-            </div>
-            """, unsafe_allow_html=True)
-            st.markdown('<br>', unsafe_allow_html=True)
-            st.write("""Votre client ne semble pas avoir les éléments nécessaires pour rembourser son crédit durablement. 
-                 Nous ne conseillons pas l’obtention du prêt.""")
-            st.markdown("<br>", unsafe_allow_html=True)
+        if prediction == 0:
+            st.write("Votre client semble avoir les éléments requis pour rembourser son crédit durablement. "
+                     "Nous conseillons l’obtention du prêt.")
+        else:
+            st.write("Votre client ne semble pas avoir les éléments nécessaires pour rembourser son crédit durablement. "
+                     "Nous ne conseillons pas l’obtention du prêt.")
+
+        st.markdown("<br>", unsafe_allow_html=True)
+        
 
     else:
         st.write("Veuillez cliquer sur le bouton pour obtenir la prédiction.")
@@ -151,7 +151,8 @@ def main():
         st.markdown("<br>", unsafe_allow_html=True)
 
     # Sélection de colonnes spécifiques pour un affichage détaillé
-        specific_columns = st.multiselect("Choisissez les colonnes pour un affichage détaillé:", sample_df.columns)
+        columns_without_index = [col for col in sample_df.columns if col != 'index']  # Remplacez 'index' par le nom réel de votre colonne d'index, si différent
+        specific_columns = st.multiselect("Choisissez les colonnes pour un affichage détaillé:", columns_without_index)
         if specific_columns:
             st.markdown("<h4>Détails sélectionnés</h4>", unsafe_allow_html=True)
             st.write(data_to_predict[specific_columns])
@@ -162,37 +163,62 @@ def main():
     if st.sidebar.checkbox("Facteurs clefs du client"):
         st.markdown("<h3 style='text-align: left; color: #800020 ;'>Facteurs clefs du client</h3>", unsafe_allow_html=True)
         with st.expander("Cliquez pour afficher les détails"):
-            st.markdown("""Comment lire ce graphique:<br>         
-            <b>Axe Vertical:</b><br>
-            Chaque point sur le graphique représente un facteur de votre 
-            jeu de données, c'est-à-dire une information caractéristique de votre client.
-            Les facteurs les plus influents sont en haut, et les moins influents sont en bas.
-            <br>    
-            <b>Axe Horizontal:</b><br>
-            L'axe horizontal montre à quel point un facteur influence la prédiction.
-            Si un point est à droite du centre (0), cela signifie que ce facteur augmente la 
-            probabilité que le prêt ne soit pas remboursé et donc ne sera pas accordé. Au contraire, si le point est à gauche du centre, 
-            cela signifie qu'il augmente la probabilié que le prêt soit remboursé et donc sera accordé.
-            <br> 
-                        <br> 
-            <b>Couleur des Points:</b><br>
-            La couleur des points donne une indication supplémentaire. Les points rouges indiquent des 
-            valeurs élevées pour ce facteur et les points bleus des valeurs basses.
-            <br>  
-            <b>Densité des Points:</b><br>
-            Là où vous voyez une concentration élevée de points (rouges ou bleus), cela signifie que cette 
-            valeur particulière du facteur a un impact important pour beaucoup d'observations dans le jeu de données.
-            <br>""",unsafe_allow_html=True)
+            st.markdown("""<b>Comment lire ce graphique:</b><br>
+Ce graphique illustre l'importance des différents facteurs pris en compte lors de l'évaluation du dossier du client. Les barres peuvent avoir des couleurs allant du bleu au rouge, et leur position sur l'axe horizontal indique leur niveau d'influence sur la décision finale. Vous pouvez zoomer sur des facteurs en particulier.<br>
 
-        explainer = shap.TreeExplainer(model.named_steps['classifier'])
-        shap_values = explainer.shap_values(data_to_predict)
+<b>Axe Vertical:</b><br>
+Chaque barre du graphique représente un facteur spécifique ou une caractéristique du client. Ces facteurs sont triés par ordre d'importance, les facteurs les plus influents étant situés en haut du graphique.<br>
+
+<b>Axe Horizontal:</b><br>
+L'axe horizontal représente le niveau d'importance de chaque facteur. Une barre qui s'étend vers la droite indique une influence positive sur la prédiction (augmente la probabilité d'accorder le prêt), tandis qu'une barre s'étendant vers la gauche indique une influence négative (diminue la probabilité d'accorder le prêt).<br>
+
+<b>Couleur des Barres:</b><br>
+La couleur des barres offre une indication visuelle supplémentaire du niveau d'influence : les barres rouges représentent une influence positive importante, tandis que les barres bleues représentent une influence négative importante. Plus la couleur est intense, plus l'effet est important.<br>
+""", unsafe_allow_html=True)
+
+        # Charger les données
+        X_sample, _ = load_data()
+
+        # Récupérer les données du client sélectionné
+        data_to_predict = X_sample.loc[[index_selected]]
+        print(f'{data_to_predict=}')
+        print('\n')
+        print(f'{type(data_to_predict)=}')
+        print('\n')
+        print(f'{(data_to_predict.shape)}')
+        print('\n\n\n')
+
+        # Appeler la fonction pour obtenir la prédiction et les SHAP values
+        features_importance = predict_with_api(data_to_predict, 'explain')
+        print(f'{type(features_importance)=}')
+        print(f'{len(features_importance)=}')
+        print('\n\n\n')
         
-        shap.initjs()
-    
-        # Générez votre plot
-        shap.summary_plot(shap_values[1], data_to_predict, show=False)
-        st.pyplot()
-        st.markdown("<br>"*4, unsafe_allow_html=True)
+
+        # Applatie la liste de listes en une seule liste
+        features_importance_flat = [item for sublist in features_importance for item in sublist]
+
+        # Créé un DataFrame avec les noms des features et les valeurs d'importance
+        import pandas as pd
+        features_df = pd.DataFrame({'feature': data_to_predict.columns, 'importance': features_importance_flat})
+
+        # Supprime la ligne correspondant à la feature 'index' (ajustez 'index_feature_name' selon le nom correct)
+        index_feature_name = 'index'  
+        features_df = features_df[features_df['feature'] != index_feature_name]
+
+        # Trie le DataFrame par les valeurs d'importance en ordre décroissant
+        features_df = features_df.sort_values(by='importance', ascending=False)
+        
+        # Créé un bar plot avec les SHAP values
+        import plotly.express as px
+        fig = px.bar(x=features_df['importance'], y=features_df['feature'], orientation='h', color=features_df['importance'], color_continuous_scale='bluered')
+        fig.update_layout(
+        xaxis_title="<b>Niveau d'Importance</b>", 
+        yaxis_title="<b>Facteurs clefs</b>",
+        height=800,
+        width=1000
+        )
+        st.plotly_chart(fig)
 
 
     # Option "Information sur les facteurs clefs généraux"
@@ -209,7 +235,7 @@ def main():
         feature_importances = pd.DataFrame({'Feature': X_sample.columns, 'Importance': importances})
         feature_importances = feature_importances.sort_values(by='Importance', ascending=True)  # Inversez ici pour le tri ascendant
 
-        # Ajouter une réglette pour choisir le nombre de caractéristiques à afficher
+        # Ajoute une réglette pour choisir le nombre de caractéristiques à afficher
         num_features = st.slider('Nombre de facteurs clefs à afficher:', min_value=5, max_value=15, value=10, step=5)
         top_features = feature_importances[-num_features:]  # Prend les derniers éléments au lieu des premiers
         
@@ -225,12 +251,10 @@ def main():
                  color='Importance',
                  color_continuous_scale= 'bluered')  
 
-        # Mettre à jour les titres des axes et les mettre en gras
         fig.update_layout(
             xaxis_title="<b>Niveau d'Importance</b>", 
             yaxis_title="<b>Facteurs clefs</b>"
 )
-
 
         st.plotly_chart(fig)
 
@@ -242,20 +266,21 @@ def main():
                  les données des clients similaires. Pour chacune des comparaisons, les données des autres clients s'affichent sous forme de statistiques descriptives : 
                 count pour compter le nombre de clients, mean pour la moyenne, std pour l'écart-type, min pour la valeur minimale, 25% pour le premier quartile, 
                 50% pour la médiane, 75% pour le troisième quartile et max pour la valeur maximale.""")
+        
         # Choix du groupe de comparaison
         compare_with = st.radio("Comparer avec :", ["Ensemble des clients", "Clients similaires"])
         
-        # Obtenir les caractéristiques les plus importantes
+        # Caractéristiques les plus importantes
         importances = model.named_steps['classifier'].feature_importances_
         feature_importances = pd.DataFrame({'Feature': X_sample.columns, 'Importance': importances})
         feature_importances_sorted = feature_importances.sort_values(by='Importance', ascending=False)
         top_features = feature_importances_sorted['Feature'][:10].tolist()  # Top 10 caractéristiques les plus importantes
 
-        # Filtrer les données selon les caractéristiques les plus importantes
+        # Filtre les données selon les caractéristiques les plus importantes
         X_filtered = X[top_features]
         data_to_predict_filtered = data_to_predict[top_features]
 
-        # Afficher les statistiques descriptives
+        # Affiche les statistiques descriptives
         if compare_with == "Ensemble des clients":
             st.write("Comparaison avec l'ensemble des clients:")
             desc = X_filtered.describe()
@@ -267,7 +292,7 @@ def main():
             st.write(data_to_predict_filtered)
             
         else:  # Clients similaires
-            # Définir les clients similaires (10 plus proches)
+            # Définie les clients similaires (10 plus proches)
             imputer = SimpleImputer(strategy='most_frequent')
             X_filled = pd.DataFrame(imputer.fit_transform(X_filtered), columns=X_filtered.columns)
 
