@@ -62,7 +62,8 @@ def plot_parallel_bars(client_data, similar_clients_data, top_features):
 # Charger le modèle formé
 @st.cache_data
 def load_model():
-    model = joblib.load('best_model.pkl')
+    model = joblib.load('C:/Users/DalilaDerdar/OneDrive - Supplier Assessment Services Limited/Bureau/Scoring_Model/notebook/Streamlit_pages/best_model.pkl')
+    print(f'{model=}')
     return model
 
 #Predire avec API Flask
@@ -94,7 +95,9 @@ def main():
     import pandas as pd
     sample_df = pd.read_csv('../../data/sample_df.csv')
     X_sample = sample_df.drop(columns=["TARGET"])
-
+    print(f'{X_sample=}')
+    print('\n\n\n')
+    print(f'{type(X_sample)=}') 
     # Créer une sidebar
     index_selected = st.sidebar.selectbox("""Choisissez le dossier client à tester en sélectionnant 
                                           son numéro de dossier:""", X_sample.index)
