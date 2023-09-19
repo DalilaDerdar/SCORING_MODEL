@@ -4,4 +4,17 @@
 final_df
 sample_df
 mlruns
+env/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+db.sqlite3
+.DS_Store
+*.swp
+*.csv
+*.log
+*.egg
+*.egg-info
 
