@@ -26,8 +26,8 @@ jobs:
 
     - name: Run test_flask.py
       working-directory: ./notebook/Streamlit_pages
-      run: python ./notebook/Streamlit_pages/test_flask.py
+      run: python test_flask.py
 
     - name: Run test_custom.py
       working-directory: ./notebook/Streamlit_pages
-      run: python ./notebook/Streamlit_pages/test_custom.py
+      run: python test_custom.py
