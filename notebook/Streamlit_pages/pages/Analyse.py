@@ -167,13 +167,13 @@ def main():
         st.markdown("<h3 style='text-align: left; color: #800020 ;'>Facteurs clefs du client</h3>", unsafe_allow_html=True)
         with st.expander("Cliquez pour afficher les détails"):
             st.markdown("""<b>Comment lire ce graphique:</b><br>
-Ce graphique illustre l'importance des différents facteurs pris en compte lors de l'évaluation du dossier du client. Les barres peuvent avoir des couleurs allant du bleu au rouge, et leur position sur l'axe horizontal indique leur niveau d'influence sur la décision finale. Vous pouvez zoomer sur des facteurs en particulier.<br>
+Ce graphique illustre l'importance des différents facteurs pris en compte lors de l'évaluation du dossier du client. Les barres peuvent avoir des couleurs allant du bleu au rouge, et leur position sur l'axe horizontal indique leur niveau d'influence sur la décision finale.<br>
 
 <b>Axe Vertical:</b><br>
 Chaque barre du graphique représente un facteur spécifique ou une caractéristique du client. Ces facteurs sont triés par ordre d'importance, les facteurs les plus influents étant situés en haut du graphique.<br>
 
 <b>Axe Horizontal:</b><br>
-L'axe horizontal représente le niveau d'importance de chaque facteur. Une barre qui s'étend vers la droite indique une influence positive sur la prédiction (augmente la probabilité d'accorder le prêt), tandis qu'une barre s'étendant vers la gauche indique une influence négative (diminue la probabilité d'accorder le prêt).<br>
+L'axe horizontal représente le niveau d'importance de chaque facteur. Une barre qui s'étend vers la droite indique une influence positive sur la prédiction d'un non remboursement par le client (augmente la probabilité de refuser le prêt), tandis qu'une barre s'étendant vers la gauche indique une influence négative sur la prédiction d'un non remboursement par le client (diminue la probabilité de refuser le prêt).<br>
 
 <b>Couleur des Barres:</b><br>
 La couleur des barres offre une indication visuelle supplémentaire du niveau d'influence : les barres rouges représentent une influence positive importante, tandis que les barres bleues représentent une influence négative importante. Plus la couleur est intense, plus l'effet est important.<br>
@@ -211,10 +211,22 @@ La couleur des barres offre une indication visuelle supplémentaire du niveau d'
 
         # Trie le DataFrame par les valeurs d'importance en ordre décroissant
         features_df = features_df.sort_values(by='importance', ascending=False)
+
+        # Sélectionnez les 3 caractéristiques les plus positives et les 3 les plus négatives
+        top_10_positive = features_df.head(10)
+        bottom_10_negative = features_df.tail(10)
+
+        # Combine les deux sous-ensembles de données pour obtenir un total de 6 caractéristiques
+        filtered_features_df = pd.concat([top_10_positive, bottom_10_negative], axis=0)
+
+        # Triez-les par importance pour l'affichage
+        filtered_features_df = filtered_features_df.sort_values(by='importance', ascending=True)
+
         
         # Créé un bar plot avec les SHAP values
         import plotly.express as px
-        fig = px.bar(x=features_df['importance'], y=features_df['feature'], orientation='h', color=features_df['importance'], color_continuous_scale='bluered')
+        fig = px.bar(x=filtered_features_df['importance'], y=filtered_features_df['feature'], orientation='h', color=filtered_features_df['importance'], color_continuous_scale='bluered')
+        # fig = px.bar(x=features_df['importance'], y=features_df['feature'], orientation='h', color=features_df['importance'], color_continuous_scale='bluered')
         fig.update_layout(
         xaxis_title="<b>Niveau d'Importance</b>", 
         yaxis_title="<b>Facteurs clefs</b>",
