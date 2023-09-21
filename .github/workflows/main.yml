@@ -25,7 +25,9 @@ jobs:
         pip install -r requirements.txt  # Si vous avez un fichier requirements.txt pour vos dépendances.
 
     - name: Run test_flask.py
+      working-directory: ./notebook/Streamlit_pages
       run: python ./notebook/Streamlit_pages/test_flask.py
 
     - name: Run test_custom.py
+      working-directory: ./notebook/Streamlit_pages
       run: python ./notebook/Streamlit_pages/test_custom.py
