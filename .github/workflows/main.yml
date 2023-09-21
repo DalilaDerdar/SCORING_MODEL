@@ -26,11 +26,9 @@ jobs:
         
     - name: Start Flask API
       run: |
-        python notebook/Streamlit_pages/flask_app.py &  # Remplacez par le chemin correct
+        cd notebook/Streamlit_pages
+        python flask_app.py &  # Remplacez par le chemin correct
         sleep 10  # Attendre que l'API soit lancée
-        
-        cd ./notebook/Streamlit_pages
-        python test_flask.py
         
     - name: Run test_flask.py
       working-directory: ./notebook/Streamlit_pages
