@@ -27,8 +27,8 @@ import pandas as pd
 # from imblearn.pipeline import Pipeline as imbPipeline
 # from imblearn.over_sampling import SMOTE
 
-import os
-os.chdir('notebook/Streamlit_pages')
+# import os
+# os.chdir('notebook/Streamlit_pages')
 
 
 # %% [markdown]
