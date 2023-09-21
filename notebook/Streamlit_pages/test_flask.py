@@ -31,7 +31,7 @@ class TestFlask(unittest.TestCase):
         json_data = json.dumps(selected_row.to_dict())#transforme la ligne en dictionnaire avant d'être en json 
 
         # URL de votre API Flask
-        url = "http://localhost:5000/predict"
+        url = "http://127.0.0.1:5000/predict"
         
         # Envoyer la requête POST à l'API Flask
         response = requests.post(url, json=json_data)
