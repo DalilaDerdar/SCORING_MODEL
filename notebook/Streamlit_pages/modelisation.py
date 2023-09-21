@@ -28,7 +28,7 @@ import pandas as pd
 # from imblearn.over_sampling import SMOTE
 
 import os
-os.chdir('C:/Users/DalilaDerdar/OneDrive - Supplier Assessment Services Limited/Bureau/Scoring_Model')
+os.chdir('notebook/Streamlit_pages')
 
 
 # %% [markdown]
