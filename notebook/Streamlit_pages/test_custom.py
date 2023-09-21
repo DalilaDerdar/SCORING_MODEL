@@ -2,7 +2,7 @@ import logging
 logging.getLogger('mlflow').setLevel(logging.ERROR)
 logging.basicConfig(level=logging.ERROR)
 import sys
-sys.path.append('C:/Users/DalilaDerdar/OneDrive - Supplier Assessment Services Limited/Bureau/Scoring_Model/notebook/streamlit_pages')
+sys.path.insert(0, 'notebook/Streamlit_pages')
 import unittest
 import numpy as np
 from modelisation import custom_cost_only_fn
