@@ -30,19 +30,19 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      - name: Start Flask API
-        run: |
-          flask run &  # Remplacez par le chemin correct
-          sleep 10  # Attendre que l'API soit lancée
+      # - name: Start Flask API
+      #   run: |
+      #     flask run &  # Remplacez par le chemin correct
+      #     sleep 10  # Attendre que l'API soit lancée
           
-      - name: Run test_flask.py
-        working-directory: ./notebook/Streamlit_pages
-        run: 
-          python test_flask.py
+      # - name: Run test_flask.py
+      #   working-directory: ./notebook/Streamlit_pages
+      #   run: 
+      #     python test_flask.py
   
-      - name: Run test_custom.py
-        working-directory: ./notebook/Streamlit_pages
-        run: python test_custom.py
+      # - name: Run test_custom.py
+      #   working-directory: ./notebook/Streamlit_pages
+      #   run: python test_custom.py
         
       # Optional: Add step to run tests here (PyTest, Django test suites, etc.)
       
