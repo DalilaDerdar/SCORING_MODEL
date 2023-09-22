@@ -1,7 +1,20 @@
 *.csv
+!data/sample_df.csv
 *.xlsx
 *.pptx
 final_df
 sample_df
 mlruns
+env/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+db.sqlite3
+.DS_Store
+*.swp
+*.log
+*.egg
+*.egg-info
 
