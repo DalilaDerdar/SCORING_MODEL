@@ -4,9 +4,7 @@
 
 import unittest
 from flask import json
-import sys
-sys.path.insert(0, 'notebook/Streamlit_pages')  # Il faut pointer vers le dossier, pas le fichier directement
-from flask_app import app 
+from app import app 
 import pandas as pd
 import requests
 
@@ -16,7 +14,7 @@ class TestFlask(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.app = app.test_client()
-        cls.sample_df = pd.read_csv('../../data/sample_df.csv')  
+        cls.sample_df = pd.read_csv('data/sample_df.csv')  
         cls.X_sample = cls.sample_df.drop(columns=["TARGET"])
         print(type(cls.X_sample))
 
