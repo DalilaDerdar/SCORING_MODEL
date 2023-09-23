@@ -71,8 +71,15 @@ def predict_with_api(features, route):
     url_base = "https://dalid.azurewebsites.net/" # "http://localhost:5000/"  #vérifier l'url VS url de flask_app.py
     url = url_base + route
     response = requests.post(url, json=json.dumps(features.to_dict()))  
+
+    # Vérifier le statut de la réponse
+    if response.status_code != 200:
+        st.error(f"Erreur avec le statut {response.status_code}: {response.text}")
+        return None  # ou retournez une valeur par défaut ou une erreur spécifique
+
     result = response.json()
     return result
+    
 
 
 def load_data():
