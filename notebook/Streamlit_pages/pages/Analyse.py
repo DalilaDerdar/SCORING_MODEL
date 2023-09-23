@@ -68,7 +68,7 @@ def load_model():
 
 #Predire avec API Flask
 def predict_with_api(features, route):
-    url_base = "http://localhost:5000/"  #vérifier l'url VS url de flask_app.py
+    url_base = "https://dalid.azurewebsites.net/" # "http://localhost:5000/"  #vérifier l'url VS url de flask_app.py
     url = url_base + route
     response = requests.post(url, json=json.dumps(features.to_dict()))  
     result = response.json()
