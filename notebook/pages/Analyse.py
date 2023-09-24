@@ -62,7 +62,7 @@ def plot_parallel_bars(client_data, similar_clients_data, top_features):
 # Charger le modèle formé
 @st.cache_data
 def load_model():
-    model = joblib.load('C:/Users/DalilaDerdar/OneDrive - Supplier Assessment Services Limited/Bureau/Scoring_Model/notebook/Streamlit_pages/best_model.pkl')
+    model = joblib.load('best_model.pkl')
     print(f'{model=}')
     return model
 
