@@ -29,6 +29,7 @@ import plotly.graph_objects as go
 import plotly.express as px
 import requests
 import json
+import os
 
 
 # Fonction pour afficher les graphiques
@@ -80,7 +81,11 @@ def predict_with_api(features, route):
     result = response.json()
     return result
     
+# Affiche le répertoire de travail courant
+print("Répertoire courant:", os.getcwd())
 
+# Vérifie si le fichier '../X.pkl' est accessible depuis le répertoire courant
+print("Existence de '../X.pkl':", os.path.exists('../X.pkl'))
 
 def load_data():
     X = joblib.load('../X.pkl')
