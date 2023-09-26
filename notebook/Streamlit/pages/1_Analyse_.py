@@ -63,7 +63,7 @@ def plot_parallel_bars(client_data, similar_clients_data, top_features):
 # Charger le modèle formé
 @st.cache_data
 def load_model():
-    model = joblib.load('../best_model.pkl')
+    model = joblib.load('best_model.pkl')
     print(f'{model=}')
     return model
 
@@ -85,11 +85,11 @@ def predict_with_api(features, route):
 print("Répertoire courant:", os.getcwd())
 
 # Vérifie si le fichier '../X.pkl' est accessible depuis le répertoire courant
-print("Existence de '../X.pkl':", os.path.exists('../X.pkl'))
+print("Existence de 'X.pkl':", os.path.exists('X.pkl'))
 
 def load_data():
-    X = joblib.load('../X.pkl')
-    X_test = joblib.load('../X_test.pkl')
+    X = joblib.load('X.pkl')
+    X_test = joblib.load('X_test.pkl')
     return X, X_test
 
 X, X_test = load_data()
