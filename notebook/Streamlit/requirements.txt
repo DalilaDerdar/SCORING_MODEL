@@ -42,7 +42,7 @@ matplotlib-inline==0.1.6
 mlflow==2.4.1
 nest-asyncio==1.5.8
 numba==0.57.1
-numpy>=1.17
+numpy==1.23.0
 oauthlib==3.2.2
 packaging==23.1
 pandas==2.0.3
