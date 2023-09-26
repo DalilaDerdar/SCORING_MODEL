@@ -83,8 +83,8 @@ def predict_with_api(features, route):
 
 
 def load_data():
-    X = joblib.load('X.pkl')
-    X_test = joblib.load('X_test.pkl')
+    X = joblib.load('../X.pkl')
+    X_test = joblib.load('../X_test.pkl')
     return X, X_test
 
 X, X_test = load_data()
