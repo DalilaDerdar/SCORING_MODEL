@@ -63,7 +63,7 @@ def plot_parallel_bars(client_data, similar_clients_data, top_features):
 # Charger le modèle formé
 @st.cache_data
 def load_model():
-    model = joblib.load('best_model.pkl')
+    model = joblib.load('../best_model.pkl')
     print(f'{model=}')
     return model
 
@@ -88,8 +88,9 @@ print("Répertoire courant:", os.getcwd())
 print("Existence de 'X.pkl':", os.path.exists('X.pkl'))
 
 def load_data():
-    X = joblib.load('X.pkl','rb')
-    X_test = joblib.load('X_test.pkl','rb')
+    X = joblib.load('../X.pkl')
+    X_test = joblib.load('../X_test.pkl')
+   
     return X, X_test
 
 X, X_test = load_data()
