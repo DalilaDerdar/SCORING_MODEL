@@ -88,8 +88,8 @@ print("Répertoire courant:", os.getcwd())
 print("Existence de 'X.pkl':", os.path.exists('X.pkl'))
 
 def load_data():
-    X = joblib.load('X.pkl')
-    X_test = joblib.load('X_test.pkl')
+    X = joblib.load('X.pkl','rb')
+    X_test = joblib.load('X_test.pkl','rb')
     return X, X_test
 
 X, X_test = load_data()
