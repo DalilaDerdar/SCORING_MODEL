@@ -84,12 +84,13 @@ def predict_with_api(features, route):
 # Affiche le répertoire de travail courant
 print("Répertoire courant:", os.getcwd())
 
+
 # Vérifie si le fichier '../X.pkl' est accessible depuis le répertoire courant
-print("Existence de 'X.pkl':", os.path.exists('X.pkl'))
+print("Existence de 'X.pkl':", os.path.exists('notebook/X.pkl'))
 
 def load_data():
-    X = joblib.load('../X.pkl')
-    X_test = joblib.load('../X_test.pkl')
+    X = joblib.load('notebook/X.pkl')
+    X_test = joblib.load('notebook/X_test.pkl')
    
     return X, X_test
 
