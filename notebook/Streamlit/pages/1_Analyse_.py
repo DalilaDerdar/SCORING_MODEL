@@ -30,6 +30,7 @@ import plotly.express as px
 import requests
 import json
 import os
+from path import path_to_data_folder
 
 
 # Fonction pour afficher les graphiques
@@ -107,7 +108,7 @@ def main():
 
     # Charger les données d'échantillon pour la démo
     import pandas as pd
-    sample_df = pd.read_csv('../../data/sample_df.csv')
+    sample_df = pd.read_csv(path_to_data_folder / 'sample_df.csv')
     X_sample = sample_df.drop(columns=["TARGET"])
     print(f'{X_sample=}')
     print('\n\n\n')
