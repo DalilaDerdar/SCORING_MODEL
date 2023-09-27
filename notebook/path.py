@@ -1,5 +1,5 @@
 
-from pathlib import Path
+from path import Path
 import os
 
 path_to_sampledf = os.path.join(os.getcwd(), 'data', 'sampledf.csv')
