@@ -5,3 +5,4 @@ st.markdown("<h2 style='text-align: center; color: black;'>Outil de d√©cision d‚
 st.markdown('<br>'*3, unsafe_allow_html=True)
 
 
+test = st.text_input("Entrez votre nom")
