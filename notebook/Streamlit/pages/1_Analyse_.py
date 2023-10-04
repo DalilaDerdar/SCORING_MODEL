@@ -217,13 +217,13 @@ La couleur des barres offre une indication visuelle supplémentaire du niveau d'
 
         # Créé un bar plot avec les SHAP values
         import plotly.express as px
-        fig = px.bar(x=filtered_features_df['importance'], y=filtered_features_df['feature'], orientation='h', color=filtered_features_df['importance'], color_continuous_scale='bluered')
+        fig = px.bar(x=filtered_features_df['importance'], y=filtered_features_df['feature'], orientation='h', color=filtered_features_df['importance'], color_continuous_scale='bluered', title='Facteurs clefs du client')
         # fig = px.bar(x=features_df['importance'], y=features_df['feature'], orientation='h', color=features_df['importance'], color_continuous_scale='bluered')
         fig.update_layout(
             xaxis_title="<b>Niveau d'Importance</b>", 
             yaxis_title="<b>Facteurs clefs</b>",
-            height=800,
-            width=1000
+            height=600,
+            width=800
         )
         st.plotly_chart(fig)
 
