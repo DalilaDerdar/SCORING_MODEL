@@ -1,10 +1,12 @@
 import json
 import os
+
 import joblib
 import numpy as np
 import plotly.graph_objects as go
 import requests
 import streamlit as st
+from sklearn.impute import SimpleImputer
 
 # Fonction pour afficher les graphiques
 
