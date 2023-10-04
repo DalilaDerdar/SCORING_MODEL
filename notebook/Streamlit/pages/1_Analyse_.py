@@ -1,46 +1,21 @@
-import mlflow
-from mlflow.tracking import MlflowClient
-import mlflow.sklearn
-import numpy as np
-import pandas as pd
-from sklearn.linear_model import LogisticRegression
-from sklearn.tree import DecisionTreeClassifier
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.svm import SVC
-from sklearn.model_selection import RandomizedSearchCV
-from sklearn.model_selection import train_test_split
-from sklearn.impute import SimpleImputer
-from sklearn.preprocessing import RobustScaler
-from sklearn.preprocessing import StandardScaler
-from time import time
-from sklearn.model_selection import GridSearchCV
-from sklearn.pipeline import Pipeline
-from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score, roc_curve, confusion_matrix, classification_report
-from sklearn.model_selection import cross_val_score, cross_validate, StratifiedKFold, learning_curve, validation_curve
-from sklearn.neighbors import KNeighborsClassifier
-from scipy.stats import randint
-import matplotlib.pyplot as plt
-from imblearn.pipeline import Pipeline as imbPipeline
-from imblearn.over_sampling import SMOTE
-import streamlit as st
-import joblib
-import shap
-import plotly.graph_objects as go
-import plotly.express as px
-import requests
 import json
 import os
-
-
+import joblib
+import numpy as np
+import plotly.graph_objects as go
+import requests
+import streamlit as st
 
 # Fonction pour afficher les graphiques
+
+
 def plot_parallel_bars(client_data, similar_clients_data, top_features):
     # Créer des données pour le graphique
     categories = top_features
-    
+
     # Valeurs du client
     client_values = client_data[top_features].values.tolist()[0]
-    
+
     # Valeurs moyennes des clients similaires
     similar_values = similar_clients_data[top_features].mean().tolist()
 
@@ -49,7 +24,7 @@ def plot_parallel_bars(client_data, similar_clients_data, top_features):
         go.Bar(name='Client', x=categories, y=client_values, marker_color='#CC00FF'),
         go.Bar(name='Clients Similaires (Moyenne)', x=categories, y=similar_values, marker_color='#0033FF')
     ])
-    
+
     # Disposition du graphique
     fig.update_layout(
         title="Comparaison du facteur clef, entre le client et les clients similaires",
@@ -58,21 +33,25 @@ def plot_parallel_bars(client_data, similar_clients_data, top_features):
         xaxis_title="Facteurs clefs",
         template="plotly_dark"  # Pour un thème moderne sombre
     )
-    
+
     return fig
 
 # Charger le modèle formé
+
+
 @st.cache_data
 def load_model():
     model = joblib.load('notebook/best_model.pkl')
     print(f'{model=}')
     return model
 
-#Predire avec API Flask
+# Predire avec API Flask
+
+
 def predict_with_api(features, route):
-    url_base = "https://dalid.azurewebsites.net/" # "http://localhost:5000/"  #vérifier l'url VS url de flask_app.py
+    url_base = "https://dalid.azurewebsites.net/"  # vérifier l'url VS url de flask_app.py
     url = url_base + route
-    response = requests.post(url, json=json.dumps(features.to_dict()))  
+    response = requests.post(url, json=json.dumps(features.to_dict()))
 
     # Vérifier le statut de la réponse
     if response.status_code != 200:
@@ -81,19 +60,21 @@ def predict_with_api(features, route):
 
     result = response.json()
     return result
-    
 # Affiche le répertoire de travail courant
+
+
 print("Répertoire courant:", os.getcwd())
 
 
 # Vérifie si le fichier '../X.pkl' est accessible depuis le répertoire courant
 print("Existence de 'X.pkl':", os.path.exists('notebook/X.pkl'))
 
+
 def load_data():
     X = joblib.load('notebook/X.pkl')
     X_test = joblib.load('notebook/X_test.pkl')
-   
     return X, X_test
+
 
 X, X_test = load_data()
 
@@ -102,7 +83,7 @@ X, X_test = load_data()
 def main():
     st.markdown("<h1 style='text-align: center; color: #800020 ;'>PRET A DEPENSER</h1>", unsafe_allow_html=True)
     st.markdown('<br>', unsafe_allow_html=True)
-    
+
     # Charger le modèle
     model = load_model()
 
@@ -117,12 +98,10 @@ def main():
     index_selected = st.sidebar.selectbox("""Choisissez le dossier client à tester en sélectionnant 
                                           son numéro de dossier:""", X_sample.index)
     data_to_predict = X_sample.loc[[index_selected]]
-
-    
+  
     st.markdown("""<h2 style='text-align: left; color: #5a5a5a;'>Résultat d'analyse du dossier client n°{}</h2>""".format(index_selected), 
                 unsafe_allow_html=True)
     st.markdown('<br>', unsafe_allow_html=True)
-
 
     if st.sidebar.button('Lancer la prédiction'):
         selected_row = X_sample.loc[index_selected]
@@ -150,11 +129,9 @@ def main():
                      "Nous ne conseillons pas l’obtention du prêt.")
 
         st.markdown("<br>", unsafe_allow_html=True)
-        
 
     else:
         st.write("Veuillez cliquer sur le bouton pour obtenir la prédiction.")
-
 
     # Option "Information du client"
     if st.sidebar.checkbox("Informations du client"):
@@ -169,7 +146,7 @@ def main():
         st.markdown("<br>", unsafe_allow_html=True)
 
     # Sélection de colonnes spécifiques pour un affichage détaillé
-        columns_without_index = [col for col in sample_df.columns if col != 'index']  # Remplacez 'index' par le nom réel de votre colonne d'index, si différent
+        columns_without_index = [col for col in sample_df.columns if col != 'index' and col != 'TARGET']  # Remplacez 'index' par le nom réel de votre colonne d'index, si différent
         specific_columns = st.multiselect("Choisissez les colonnes pour un affichage détaillé:", columns_without_index)
         if specific_columns:
             st.markdown("<h4>Détails sélectionnés</h4>", unsafe_allow_html=True)
@@ -211,7 +188,6 @@ La couleur des barres offre une indication visuelle supplémentaire du niveau d'
         print(f'{type(features_importance)=}')
         print(f'{len(features_importance)=}')
         print('\n\n\n')
-        
 
         # Applatie la liste de listes en une seule liste
         features_importance_flat = [item for sublist in features_importance for item in sublist]
@@ -237,19 +213,17 @@ La couleur des barres offre une indication visuelle supplémentaire du niveau d'
         # Triez-les par importance pour l'affichage
         filtered_features_df = filtered_features_df.sort_values(by='importance', ascending=True)
 
-        
         # Créé un bar plot avec les SHAP values
         import plotly.express as px
         fig = px.bar(x=filtered_features_df['importance'], y=filtered_features_df['feature'], orientation='h', color=filtered_features_df['importance'], color_continuous_scale='bluered')
         # fig = px.bar(x=features_df['importance'], y=features_df['feature'], orientation='h', color=features_df['importance'], color_continuous_scale='bluered')
         fig.update_layout(
-        xaxis_title="<b>Niveau d'Importance</b>", 
-        yaxis_title="<b>Facteurs clefs</b>",
-        height=800,
-        width=1000
+            xaxis_title="<b>Niveau d'Importance</b>", 
+            yaxis_title="<b>Facteurs clefs</b>",
+            height=800,
+            width=1000
         )
         st.plotly_chart(fig)
-
 
     # Option "Information sur les facteurs clefs généraux"
     import plotly.express as px
@@ -268,15 +242,13 @@ La couleur des barres offre une indication visuelle supplémentaire du niveau d'
         # Ajoute une réglette pour choisir le nombre de caractéristiques à afficher
         num_features = st.slider('Nombre de facteurs clefs à afficher:', min_value=5, max_value=15, value=10, step=5)
         top_features = feature_importances[-num_features:]  # Prend les derniers éléments au lieu des premiers
-        
-        
-    
-        fig = px.bar(top_features, 
-                 x='Importance', 
-                 y='Feature', 
+
+        fig = px.bar(top_features,
+                 x='Importance',
+                 y='Feature',
                  orientation='h',
-                 labels={'Feature':'Features', 'Importance':'Importance'},
-                 
+                 labels={'Feature': 'Features', 'Importance': 'Importance'},
+
                  title=f'Top {num_features} des facteurs clefs généraux',
                  color='Importance',
                  color_continuous_scale= 'bluered')  
@@ -334,7 +306,7 @@ La couleur des barres offre une indication visuelle supplémentaire du niveau d'
             st.write("Comparaison avec les clients similaires:")
             desc_similar = closest_clients.describe()
             st.write(desc_similar)
-            
+
             # Informations spécifiques du client par rapport aux clients similaires
             client_info = data_to_predict_filtered.describe()
             st.write(f"Informations pour le client n°{index_selected}:")
@@ -342,7 +314,7 @@ La couleur des barres offre une indication visuelle supplémentaire du niveau d'
 
             st.markdown("<br>"*3, unsafe_allow_html=True)
 
-            #Graphique de comparaison
+            # Graphique de comparaison
             # Choix de la caractéristique à comparer
             st.markdown("<h4 style='text-align: left; color: black ;'>Comparaison des facteurs clefs</h4>", unsafe_allow_html=True)
             with st.expander("Cliquez pour afficher les détails"):
@@ -350,9 +322,7 @@ La couleur des barres offre une indication visuelle supplémentaire du niveau d'
             feature_to_compare = st.selectbox("Choisissez le facteur clef :", top_features)
             fig = plot_parallel_bars(data_to_predict, closest_clients, [feature_to_compare])
             st.plotly_chart(fig)
-    
+
 
 if __name__ == '__main__':
     main()
-
-
